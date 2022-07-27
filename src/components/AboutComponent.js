@@ -16,7 +16,7 @@ function RenderLeader({ leader }) {
         object
         src={leader.image}
         alt={leader.name}
-        className="align-self-start"
+        className="align-self-start me-5"
       />
       <Media body>
         <Media heading>{leader.name}</Media>
