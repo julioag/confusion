@@ -4,6 +4,8 @@ import { Dishes } from "./dishes";
 import { Comments } from "./comments";
 import { Promotions } from "./promotions";
 import { Leaders } from "./leaders";
+import thunk from "redux-thunk";
+import logger from "redux-logger";
 
 const store = () =>
   configureStore({
@@ -13,6 +15,8 @@ const store = () =>
       promotions: Promotions,
       leaders: Leaders,
     }),
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(thunk, logger),
   });
 
 export default store;
