@@ -1,5 +1,12 @@
 import React, { Component } from "react";
-import { Navigate, Route, Routes, useParams } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useParams,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { connect } from "react-redux";
 import Home from "./HomeComponent";
 import Menu from "./MenuComponent";
@@ -15,6 +22,7 @@ import {
   fetchPromos,
 } from "../redux/ActionCreators";
 import { actions } from "react-redux-form";
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -38,7 +46,22 @@ const mapDispatchToProps = (dispatch) => ({
   fetchPromos: () => dispatch(fetchPromos()),
 });
 
+function withRouter(Component) {
+  function ComponentWithRouterProp(props) {
+    let location = useLocation();
+    let navigate = useNavigate();
+    let params = useParams();
+    return <Component {...props} router={{ location, navigate, params }} />;
+  }
+
+  return ComponentWithRouterProp;
+}
+
 class Main extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   componentDidMount() {
     this.props.fetchDishes();
     this.props.fetchComments();
@@ -87,32 +110,40 @@ class Main extends Component {
     return (
       <div>
         <Header />
-        <Routes>
-          <Route path="/home" element={<HomePage />} />
-          <Route
-            exact
-            path="/menu"
-            element={<Menu dishes={this.props.dishes} />}
-          />
-          <Route path="/menu/:dishId" element={<DishWithId />} />
-          <Route path="/" element={<Navigate replace to="/home" />} />
-          <Route
-            exact
-            path="/contactus"
-            element={
-              <Contact resetFeedbackForm={this.props.resetFeedbackForm} />
-            }
-          />
-          <Route
-            exact
-            path="/aboutus"
-            element={<About leaders={this.props.leaders} />}
-          />
-        </Routes>
+        <TransitionGroup>
+          <CSSTransition
+            key={this.props.router.location.key}
+            classNames="page"
+            timeout={300}
+          >
+            <Routes>
+              <Route path="/home" element={<HomePage />} />
+              <Route
+                exact
+                path="/menu"
+                element={<Menu dishes={this.props.dishes} />}
+              />
+              <Route path="/menu/:dishId" element={<DishWithId />} />
+              <Route path="/" element={<Navigate replace to="/home" />} />
+              <Route
+                exact
+                path="/contactus"
+                element={
+                  <Contact resetFeedbackForm={this.props.resetFeedbackForm} />
+                }
+              />
+              <Route
+                exact
+                path="/aboutus"
+                element={<About leaders={this.props.leaders} />}
+              />
+            </Routes>
+          </CSSTransition>
+        </TransitionGroup>
         <Footer />
       </div>
     );
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Main);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Main));
